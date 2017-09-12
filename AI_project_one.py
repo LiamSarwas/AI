@@ -1,7 +1,18 @@
 import queue
 from collections import namedtuple
+import heapq
+import math
 
-State = namedtuple('State', ['state', 'depth', 'state_list'])
+State = namedtuple('State', ['cost', 'state_list'])
+
+
+def state_cmp(a, b):
+    if a[1] == b[1]:
+        return 0
+    elif a[1] <= b[1]:
+        return -1
+    else:
+        return 1
 
 
 def get_init_state(goal):
@@ -123,10 +134,10 @@ def manhattan_dist(state, goal):
     for i in range(0, len(state)):
         if state[i] == goal[i]:
             continue
-        else:
-            score += 1
-
-    return 0
+        if state[i] == '_':
+            continue
+        score += math.fabs(i % 3 - goal.index(state[i]) % 3) + math.fabs(i // 3 - goal.index(state[i]) // 3)
+    return score
 
 
 def out_of_place(state, goal):
@@ -141,7 +152,7 @@ def out_of_place(state, goal):
 
 def depth_first(init_state, goal_state):
     q = queue.Queue()
-    q.put(State(init_state, 0, [init_state]))
+    q.put(State(0, [init_state]))
 
     closed = set()
     max_nodes = 0
@@ -154,25 +165,106 @@ def depth_first(init_state, goal_state):
         if q.qsize() + len(closed) > max_nodes:
             max_nodes = q.qsize() + len(closed)
 
-        if current.state in closed:
+        if current.state_list[-1] in closed:
             continue
 
-        if current.state == goal_state:
+        if current.state_list[-1] == goal_state:
             return current, count, max_nodes
 
-        for successor in get_successors(current.state):
+        for successor in get_successors(current.state_list[-1]):
             new_list = list(current.state_list)
             new_list.append(successor)
-            q.put(State(successor, current.depth + 1, new_list))
-        closed.add(current.state)
+            q.put(State(current.cost + 1, new_list))
+        closed.add(current.state_list[-1])
 
 
 def greedy_best_first(init_state, goal_state):
-    return True
+    heap = []
+    heapq.heappush(heap, State(manhattan_dist(init_state, goal_state), [init_state]))
+
+    closed = set()
+    max_nodes = 0
+    count = 0
+
+    while True:
+        current = heapq.heappop(heap)
+        current_state = current.state_list[-1]
+        count += 1
+
+        if len(heap) + len(closed) > max_nodes:
+            max_nodes = len(heap) + len(closed)
+
+        if current_state in closed:
+            continue
+
+        if current_state == goal_state:
+            return current, count, max_nodes
+
+        for successor in get_successors(current_state):
+            new_list = list(current.state_list)
+            new_list.append(successor)
+            heapq.heappush(heap, State(manhattan_dist(current_state, goal_state), new_list))
+        closed.add(current_state)
 
 
-def a_star(init_state, goal_state):
-    return True
+def a_star_oop(init_state, goal_state):
+    heap = []
+    heapq.heappush(heap, State(manhattan_dist(init_state, goal_state), [init_state]))
+
+    closed = set()
+    max_nodes = 0
+    count = 0
+
+    while True:
+        current = heapq.heappop(heap)
+        current_state = current.state_list[-1]
+        count += 1
+
+        if len(heap) + len(closed) > max_nodes:
+            max_nodes = len(heap) + len(closed)
+
+        if current_state in closed:
+            continue
+
+        if current_state == goal_state:
+            return current, count, max_nodes
+
+        for successor in get_successors(current_state):
+            new_list = list(current.state_list)
+            new_list.append(successor)
+            heapq.heappush(heap, State(out_of_place(current_state, goal_state) + len(current.state_list), new_list))
+
+        closed.add(current_state)
+
+
+def a_star_md(init_state, goal_state):
+    heap = []
+    heapq.heappush(heap, State(manhattan_dist(init_state, goal_state), [init_state]))
+
+    closed = set()
+    max_nodes = 0
+    count = 0
+
+    while True:
+        current = heapq.heappop(heap)
+        current_state = current.state_list[-1]
+        count += 1
+
+        if len(heap) + len(closed) > max_nodes:
+            max_nodes = len(heap) + len(closed)
+
+        if current_state in closed:
+            continue
+
+        if current_state == goal_state:
+            return current, count, max_nodes
+
+        for successor in get_successors(current_state):
+            new_list = list(current.state_list)
+            new_list.append(successor)
+            heapq.heappush(heap, State(manhattan_dist(current_state, goal_state) + len(current.state_list), new_list))
+
+        closed.add(current_state)
 
 
 def main():
@@ -187,7 +279,30 @@ def main():
         print_state(state)
     print('Max nodes in search space is: ', stats[2])
     print('Number of nodes searched is: ', stats[1])
-    print('Solution depth is: ', stats[0].depth)
+    print('Solution depth is: ', len(stats[0].state_list))
 
+    stats = greedy_best_first(init, goal)
+    print('Solution: \n')
+    for state in stats[0].state_list:
+        print_state(state)
+    print('Max nodes in search space is: ', stats[2])
+    print('Number of nodes searched is: ', stats[1])
+    print('Solution depth is: ', len(stats[0].state_list))
+
+    stats = a_star_oop(init, goal)
+    print('Solution: \n')
+    for state in stats[0].state_list:
+        print_state(state)
+    print('Max nodes in search space is: ', stats[2])
+    print('Number of nodes searched is: ', stats[1])
+    print('Solution depth is: ', len(stats[0].state_list))
+
+    stats = a_star_md(init, goal)
+    print('Solution: \n')
+    for state in stats[0].state_list:
+        print_state(state)
+    print('Max nodes in search space is: ', stats[2])
+    print('Number of nodes searched is: ', stats[1])
+    print('Solution depth is: ', len(stats[0].state_list))
 
 main()
