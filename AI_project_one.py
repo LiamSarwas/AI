@@ -141,7 +141,7 @@ def out_of_place(state, goal):
     return count
 
 
-def depth_first(init_state, goal_state):
+def breadth_first(init_state, goal_state):
     q = queue.Queue()
     q.put(State(0, [init_state]))
 
@@ -264,31 +264,29 @@ def main():
     goal = get_goal()
     init = get_init_state(goal)
 
-    stats = depth_first(init, goal)
-    print('Solution: \n')
-    for state in stats[0].state_list:
-        print_state(state)
-    print('Max nodes in search space is: ', stats[2])
-    print('Number of nodes searched is: ', stats[1])
-    print('Solution depth is: ', len(stats[0].state_list))
+    print('Breadth first search is 1.')
+    print('Greedy best first search with the manhattan heuristic is 2.')
+    print('A* search with the out of place tile heuristic is 3.')
+    print('A* search with the manhattan heuristic is 4.')
 
-    stats = greedy_best_first(init, goal)
-    print('Solution: \n')
-    for state in stats[0].state_list:
-        print_state(state)
-    print('Max nodes in search space is: ', stats[2])
-    print('Number of nodes searched is: ', stats[1])
-    print('Solution depth is: ', len(stats[0].state_list))
+    while True:
+        method = input('Which search method would you like to use? ')
+        if method == '1':
+            stats = breadth_first(init, goal)
+            break
+        if method == '2':
+            stats = greedy_best_first(init, goal)
+            break
+        if method == '3':
+            stats = a_star_oop(init, goal)
+            break
+        if method == '4':
+            stats = a_star_md(init, goal)
+            break
+        else:
+            print('Invalid selection. Please try again.')
 
-    stats = a_star_oop(init, goal)
-    print('Solution: \n')
-    for state in stats[0].state_list:
-        print_state(state)
-    print('Max nodes in search space is: ', stats[2])
-    print('Number of nodes searched is: ', stats[1])
-    print('Solution depth is: ', len(stats[0].state_list))
-
-    stats = a_star_md(init, goal)
+    print()
     print('Solution: \n')
     for state in stats[0].state_list:
         print_state(state)
