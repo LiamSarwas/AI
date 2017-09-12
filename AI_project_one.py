@@ -292,6 +292,6 @@ def main():
         print_state(state)
     print('Max nodes in search space is: ', stats[2])
     print('Number of nodes searched is: ', stats[1])
-    print('Solution depth is: ', len(stats[0].state_list))
+    print('Solution depth is: ', len(stats[0].state_list) - 1)
 
 main()
