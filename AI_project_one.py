@@ -6,15 +6,6 @@ import math
 State = namedtuple('State', ['cost', 'state_list'])
 
 
-def state_cmp(a, b):
-    if a[1] == b[1]:
-        return 0
-    elif a[1] <= b[1]:
-        return -1
-    else:
-        return 1
-
-
 def get_init_state(goal):
     test = '12345678_'
     while True:
