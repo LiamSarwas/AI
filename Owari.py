@@ -1,4 +1,5 @@
 import random
+import Player
 
 
 class Owari():
@@ -113,6 +114,7 @@ class Owari():
 
 def main():
     o = Owari()
+    p = Player.Player()
     o.print_board()
 
     while not o.is_game_over():
@@ -128,7 +130,7 @@ def main():
                     print('Invalid move choice. Please try again.')
 
         else:
-            o.move(move_list[random.randint(0, len(move_list)-1)])
+            o.move(p.get_next_move(o.get_board(), move_list))
         o.print_board()
 
     o.print_board()
