@@ -2,8 +2,16 @@ import queue
 from collections import namedtuple
 import heapq
 import math
+import random
 
 State = namedtuple('State', ['cost', 'state_list'])
+
+
+def get_rand_state():
+    state = ['1', '2', '3', '4', '5', '6', '7', '8', '_']
+    random.shuffle(state)
+    state = ''.join(state)
+    return state
 
 
 def get_init_state(goal):
@@ -258,8 +266,10 @@ def a_star_md(init_state, goal_state):
         closed.add(current_state)
 
 
-def main():
-    print('A configuration is a blah blah blah.')
+def main_user_input():
+    print('A valid configuration is a list of numbers from 1 to 8 with no repeats, and one underscore.\n'
+          'The first three characters represent the first row, the second three the second row, the\n'
+          'third three the third row, and the the underscore represents the empty space.')
     
     goal = get_goal()
     init = get_init_state(goal)
@@ -293,5 +303,58 @@ def main():
     print('Max nodes in search space is: ', stats[2])
     print('Number of nodes searched is: ', stats[1])
     print('Solution depth is: ', len(stats[0].state_list) - 1)
+
+
+def main():
+    bread_first_stats = [0, 0, 0]
+    greed_stats = [0, 0, 0]
+    astar_oop_stats = [0, 0, 0]
+    astar_md_stats = [0, 0, 0]
+
+    limit = 100
+    i = 0
+
+    while i < limit:
+        init = get_rand_state()
+        goal = get_rand_state()
+        if not is_solvable(init, goal):
+            continue
+        else:
+            stats = breadth_first(init, goal)
+            bread_first_stats[0] += len(stats[0].state_list) - 1
+            bread_first_stats[1] += stats[1]
+            bread_first_stats[2] += stats[2]
+
+            stats = greedy_best_first(init, goal)
+            greed_stats[0] += len(stats[0].state_list) - 1
+            greed_stats[1] += stats[1]
+            greed_stats[2] += stats[2]
+
+            stats = a_star_oop(init, goal)
+            astar_oop_stats[0] += len(stats[0].state_list) - 1
+            astar_oop_stats[1] += stats[1]
+            astar_oop_stats[2] += stats[2]
+
+            stats = a_star_md(init, goal)
+            astar_md_stats[0] += len(stats[0].state_list) - 1
+            astar_md_stats[1] += stats[1]
+            astar_md_stats[2] += stats[2]
+        i += 1
+
+    print('Breadth first average solution length: ', bread_first_stats[0] / limit)
+    print('Greedy best first average solution length: ', greed_stats[0] / limit)
+    print('A* with tiles out of place average solution length: ', astar_oop_stats[0] / limit)
+    print('A* with manhattan distance average solution length: ', astar_md_stats[0] / limit)
+
+    print('Breadth first average max number of nodes in search space: ', bread_first_stats[1] / limit)
+    print('Greedy best first average max number of nodes in search space: ', greed_stats[1] / limit)
+    print('A* with tiles out of place average max number of nodes in search space: ', astar_oop_stats[1] / limit)
+    print('A* with manhattan distance average max number of nodes in search space: ', astar_md_stats[1] / limit)
+
+    print('Breadth first average number of nodes searched: ', bread_first_stats[2] / limit)
+    print('Greedy best first average number of nodes searched: ', greed_stats[2] / limit)
+    print('A* with tiles out of place average number of nodes searched: ', astar_oop_stats[2] / limit)
+    print('A* with manhattan distance average number of nodes searched: ', astar_md_stats[2] / limit)
+
 
 main()
