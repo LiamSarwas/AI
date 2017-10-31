@@ -1,11 +1,15 @@
-import random
+from GameTree import GameTree
+from AB_search import AlphaBeta
 
 
-class Player():
+class Player:
     def __init__(self):
-        self.board = []
+        pass
 
-    def get_next_move(self, board, move_list):
-        return move_list[random.randint(0, len(move_list))]
+    @staticmethod
+    def get_next_move(game, depth, quiescent_depth):
+        gt = GameTree(quiescent_depth)
+        game_tree = gt.build_tree(game, depth)
+        best_node = AlphaBeta.alpha_beta_search(game_tree)
 
-    def evaluate(self, board, move_list):
+        return best_node.move

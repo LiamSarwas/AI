@@ -2,17 +2,16 @@ import random
 import Player
 
 
-class Owari():
-    NORTH = True
-    SOUTH = False
+class Board:
+    NORTH = False
+    SOUTH = True
+    state_history = []
+    board = []
 
     def __init__(self):
         self.board = [3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 0]
         self.player = self.get_first_player()
-        # self.player = self.NORTH
-
-    def get_board(self):
-        return self.board
+        self.state_history.append(self.board)
 
     def get_score(self):
         return self.board[6], self.board[13]
@@ -50,25 +49,33 @@ class Owari():
     def move(self, n):
         old_board = list(self.board)
 
-        # protection from invalid moves comes from GUI?
         stones = self.board[n]
         self.board[n] = 0
 
         i = 0
         while stones:
             i += 1
+
+            if self.player == self.SOUTH and (n+i) % 14 == 13:
+                continue
+            if self.player == self.NORTH and (n+i) % 14 == 6:
+                continue
+
             self.board[(n+i) % 14] += 1
             stones -= 1
 
         # does the last stone end in an empty pocket on the movers side
         last_pocket = (n+i) % 14
         if old_board[last_pocket] == 0:
-            if self.player == self.NORTH and last_pocket in range(0, 6):
+            if self.player == self.SOUTH and last_pocket in range(0, 6):
                 self.board[6] += self.board[12-last_pocket]
                 self.board[12-last_pocket] = 0
-            if self.player == self.SOUTH and last_pocket in range(7, 13):
+            if self.player == self.NORTH and last_pocket in range(7, 13):
                 self.board[13] += self.board[12 - last_pocket]
                 self.board[12 - last_pocket] = 0
+
+        self.set_next_player()
+        self.state_history.append(old_board)
 
         return self.board
 
@@ -77,9 +84,9 @@ class Owari():
         while True:
             player = input('Enter 1 or 2. ')
             if player == '1':
-                return self.SOUTH
-            if player == '2':
                 return self.NORTH
+            if player == '2':
+                return self.SOUTH
             else:
                 print('Invalid selection. Please try again.')
 
@@ -99,8 +106,6 @@ class Owari():
             for i in range(7, 13):
                 if self.board[i] != 0:
                     move_list.append(i)
-
-        self.set_next_player()
         return move_list
 
     def print_board(self):
@@ -110,31 +115,3 @@ class Owari():
         print('   ' + str(self.board[0]) + ' ' + str(self.board[1]) + ' ' + str(self.board[2]) + ' ' +
               str(self.board[3]) + ' ' + str(self.board[4]) + ' ' + str(self.board[5]) + '   ')
         print('\n')
-
-
-def main():
-    o = Owari()
-    p = Player.Player()
-    o.print_board()
-
-    while not o.is_game_over():
-        move_list = o.get_valid_moves()
-        if o.player:
-            print('Valid moves are: ', move_list)
-            while True:
-                move = input('Select a move: ')
-                if int(move) in range(0, 6) and o.board[int(move)] != 0:
-                    o.move(int(move))
-                    break
-                else:
-                    print('Invalid move choice. Please try again.')
-
-        else:
-            o.move(p.get_next_move(o.get_board(), move_list))
-        o.print_board()
-
-    o.print_board()
-    print(o.get_score())
-
-
-main()
