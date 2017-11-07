@@ -1,5 +1,20 @@
 def main():
     puzz = get_puzzle()
+    puzz = fill_domain(puzz)
+    print_sudoku(puzz)
+
+
+def fill_domain(puzzle):
+    for row in puzzle:
+        for index in range(0,len(row)):
+            if row[index] == 0:
+                row[index] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    return puzzle
+
+
+def print_sudoku(puzzle):
+    for i in range(0, len(puzzle)):
+        print(puzzle[i])
 
 
 def get_puzzle():
@@ -13,8 +28,7 @@ def get_puzzle():
             row = [int(num) for num in line.strip().split(',')]
             mat.append(row)
 
-    for i in range(0, len(mat)):
-        print(mat[i])
+    print_sudoku(mat)
 
     return mat
 
