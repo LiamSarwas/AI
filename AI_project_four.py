@@ -8,18 +8,70 @@ def main():
     print_sudoku(puzz)
 
     puzz_next = copy.copy(puzz)
-    constrain_domains(puzz_next)
+    constrain_all_domains(puzz_next)
 
     while puzz != puzz_next:
         puzz = puzz_next
         puzz_next = copy.copy(puzz)
-        constrain_domains(puzz_next)
+        constrain_all_domains(puzz_next)
+
+    while not is_done(puzz):
+        finish_puzzle(puzz)
+
 
     print()
     print_sudoku(puzz)
 
 
-def constrain_domains(puzzle):
+# is the puzzle solved
+def is_done(puzzle):
+    for i in range(0, len(puzzle)):
+        for j in range(0, len(puzzle[i])):
+            if not isinstance(puzzle[i][j], int):
+                return False
+    return True
+
+
+# choose the variable that constrains the most of its neighbors
+def most_constraining_variable(i, j, puzzle):
+    num_constraints = 0
+    max_constraining = -1
+    for choice in puzzle[i][j]:
+        num_constraining = 0
+        for element in get_row(i, puzzle):
+            if not isinstance(element, int):
+                if choice in element:
+                    num_constraining += 1
+        for element in get_column(j, puzzle):
+            if not isinstance(element, int):
+                if choice in element:
+                    num_constraining += 1
+        for element in get_square(i, j, puzzle):
+            if not isinstance(element, int):
+                if choice in element:
+                    num_constraining += 1
+        if num_constraining > num_constraints:
+            num_constraints = num_constraining
+            max_constraining = choice
+    return max_constraining
+
+
+# choose the location in the puzzle that has the least choices to begin with
+def most_constrained_variable(puzzle):
+    min_choices = 10
+    min_i = -1
+    min_j = -1
+    for i in range(0, len(puzzle)):
+        for j in range(0, len(puzzle[i])):
+            if not isinstance(puzzle[i][j], int):
+                if len(puzzle[i][j]) < min_choices:
+                    min_choices = len(puzzle[i][j])
+                    min_i = i
+                    min_j = j
+    return (min_i, min_j)
+
+
+def constrain_all_domains(puzzle):
     for i in range(0, len(puzzle)):
         for j in range(0, len(puzzle[i])):
             if not isinstance(puzzle[i][j], int):
